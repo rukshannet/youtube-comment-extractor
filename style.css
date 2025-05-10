@@ -1,0 +1,10 @@
+body {
+  font-family: sans-serif;
+  padding: 10px;
+}
+pre {
+  white-space: pre-wrap;
+  max-height: 300px;
+  overflow-y: auto;
+  border: 1px solid #ccc;
+}
