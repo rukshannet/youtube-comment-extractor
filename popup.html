@@ -1,15 +1,54 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Extract Comments</title>
-  <link rel="stylesheet" href="style.css">
+  <title>Youtube Comment Analyzer</title>
+  <link rel="stylesheet" href="popup.css">
 </head>
 <body>
-  <h4>Extract Comments V006</h4>
-  <button id="extractBtn">Get Comments</button>
-  <button id="scrollBtn">Load All Comments</button>
-  <button id="likeTopCommentsBtn">Like Top 10 Comments</button>
-  <pre id="output"></pre>
-  <script src="popup.js"></script>
+    <div id="root">
+      <div class="min-w-32 p-4 bg-[#fff4da]">
+        <div class="mb-4 flex justify-between items-center">
+          <h1 class="text-2xl font-bold tracking-tight">
+            <span class="text-red-600">YouTube</span>
+            <span class="text-[#fca847]">Scrutiny</span> 
+            <span class="text-gray-600 tracking-tighter">Ext.</span></h1>
+            <a href="http://rukshan.net" target="_blank" rel="noopener noreferrer" class="text-gray-800" title="Visit rukshan.net for more...">
+              <img src="ruk.png" width="24" height="24" alt="Logo">
+            </a></div>
+              <div class="rounded-xl relative z-20 pl-6 sm:pl-8 pr-6 sm:pr-12 py-6 border-[3px] border-gray-900 bg-[#fff4da]">
+                <form class="flex flex-col w-full h-full justify-center items-stretch space-y-4">
+                  <div class="relative w-full group">
+                      <div class="w-full h-full rounded bg-gray-800 translate-y-1 translate-x-1 absolute inset-0 z-10"></div>
+                      <button type="submit" class="py-2 rounded px-4 group-hover:-translate-y-px group-hover:-translate-x-px ease-out duration-300 z-20 relative w-full border-[3px] border-gray-900 font-medium bg-[#ffc480] tracking-wide text-base flex-shrink-0 text-gray-900">Extract & Analyze</button>
+                  </div>
+                  <hr/>
+                  <div class="space-y-2">
+                  <label for="baseUrl" class="block font-bold text-gray-900 text-sm">Thank you note..</label>
+                  <div class="relative">
+                    <div class="w-full h-full rounded bg-gray-900 translate-y-1 translate-x-1 absolute inset-0 z-10"></div>
+                  <input id="baseUrl" placeholder="Thank you for watching" class="border-[3px] w-full relative z-20 border-gray-900 placeholder-gray-500 text-base font-medium focus:outline-none py-2 px-4 rounded" type="text" value=""></div></div>
+                  <div class="space-y-2">
+                    <label class="relative inline-flex items-center cursor-pointer">
+                      <input class="sr-only peer" type="checkbox">
+                      <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer border-[3px] border-gray-900 peer-checked:after:translate-x-[19px] rtl:peer-checked:after:-translate-x-[19px] peer-checked:after:border-gray-900 after:content-[''] after:absolute after:top-[1px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#fca847]"></div>
+                    <span class="ms-3 text-sm font-bold text-gray-900">Let AI decide reply comment</span>
+                  </label>
+                  <label class="relative inline-flex items-center cursor-pointer">
+                      <input class="sr-only peer" type="checkbox">
+                      <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer border-[3px] border-gray-900 peer-checked:after:translate-x-[19px] rtl:peer-checked:after:-translate-x-[19px] peer-checked:after:border-gray-900 after:content-[''] after:absolute after:top-[1px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#fca847]"></div>
+                    <span class="ms-3 text-sm font-bold text-gray-900">Like all comments</span>
+                  </label>
+                  <div class="relative w-full group">
+                      <div class="w-full h-full rounded bg-gray-800 translate-y-1 translate-x-1 absolute inset-0 z-10"></div>
+                      <button type="submit" class="py-2 rounded px-4 group-hover:-translate-y-px group-hover:-translate-x-px ease-out duration-300 z-20 relative w-full border-[3px] border-gray-900 font-medium bg-[#ffc480] tracking-wide text-base flex-shrink-0 text-gray-900">Like & Comment</button>
+                  </div>
+                  <hr/>
+                  <p class="text-sm text-gray-600 mt-2 text-center">This free version works for the first 100 comments only.</p>
+                  </div>
+
+                  </form>
+                </div>
+              </div>
+            </div>
 </body>
 </html>

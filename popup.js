@@ -21,7 +21,7 @@ document.getElementById("likeTopCommentsBtn").addEventListener("click", async ()
 
   chrome.scripting.executeScript({
     target: { tabId: tab.id },
-    function: likeTopComments
+    function: likeAndReplyTopComments
   });
 });
 
@@ -74,38 +74,46 @@ function scrollToLoadComments() {
 }
 
 
-
-async function likeTopComments() {
+async function likeAndReplyTopComments() {
   const threads = document.querySelectorAll('ytd-comment-thread-renderer');
-  let likedCount = 0;
+  let processedCount = 0;
 
-  for (let i = 0; i < threads.length && likedCount < 10; i++) {
-    const likeRenderer = threads[i].querySelector('#like-button');
-    if (!likeRenderer) continue;
+  for (let i = 0; i < threads.length && processedCount < 10; i++) {
+    const thread = threads[i];
 
-    // ✅ get the real <button> inside the like renderer
-    const actualButton = likeRenderer.querySelector('button');
-
-    if (!actualButton) continue;
-
-    // Scroll into view to activate interaction
-    actualButton.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    await new Promise(resolve => setTimeout(resolve, 300));
-
-    const isAlreadyLiked =
-      actualButton.getAttribute('aria-pressed') === 'true' ||
-      actualButton.getAttribute('aria-disabled') === 'true';
-
-    if (!isAlreadyLiked) {
-      actualButton.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
-      likedCount++;
-      await new Promise(resolve => setTimeout(resolve, 300)); // wait between likes
+    // LIKE
+    const likeRenderer = thread.querySelector('#like-button');
+    const likeButton = likeRenderer?.querySelector('button');
+    if (likeButton && likeButton.getAttribute('aria-pressed') !== 'true') {
+      likeButton.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      await new Promise(res => setTimeout(res, 300));
+      likeButton.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
     }
+
+    // REPLY
+    const replyBtn = thread.querySelector('#reply-button-end button');
+    if (replyBtn) {
+      replyBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      await new Promise(res => setTimeout(res, 500));
+      replyBtn.click();
+
+      await new Promise(res => setTimeout(res, 500)); // wait for textarea to appear
+
+      const replyBox = thread.querySelector('ytd-commentbox #contenteditable-root');
+      const submitBtn = thread.querySelector('ytd-commentbox #submit-button');
+
+      if (replyBox && submitBtn) {
+        replyBox.innerText = '&#9824;';
+        replyBox.dispatchEvent(new Event('input', { bubbles: true }));
+
+        await new Promise(res => setTimeout(res, 500));
+        submitBtn.click();
+      }
+    }
+
+    processedCount++;
+    await new Promise(res => setTimeout(res, 1000)); // pause between comments
   }
 
-  alert(`Liked ${likedCount} comments.33`);
+  alert(`Liked and replied to ${processedCount} comments with ❤️`);
 }
-
-
-
-
