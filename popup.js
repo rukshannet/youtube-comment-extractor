@@ -1,30 +1,3 @@
-document.getElementById("extractBtn").addEventListener("click", async () => {
-  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-
-  chrome.scripting.executeScript({
-    target: { tabId: tab.id },
-    function: extractComments
-  });
-});
-
-document.getElementById("scrollBtn").addEventListener("click", async () => {
-  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-
-  chrome.scripting.executeScript({
-    target: { tabId: tab.id },
-    function: scrollToLoadComments
-  });
-});
-
-document.getElementById("likeTopCommentsBtn").addEventListener("click", async () => {
-  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-
-  chrome.scripting.executeScript({
-    target: { tabId: tab.id },
-    function: likeAndReplyTopComments
-  });
-});
-
 function extractComments() {
   const comments = [];
   document.querySelectorAll('#content-text').forEach(el => {
@@ -73,12 +46,11 @@ function scrollToLoadComments() {
   }, 1500); // Check every 1.5s to let content load
 }
 
-
-async function likeAndReplyTopComments() {
+async function likeAndReplyTopComments(commentText) {
   const threads = document.querySelectorAll('ytd-comment-thread-renderer');
   let processedCount = 0;
 
-  for (let i = 0; i < threads.length && processedCount < 10; i++) {
+  for (let i = 0; i < threads.length && processedCount < 100; i++) {
     const thread = threads[i];
 
     // LIKE
@@ -103,7 +75,7 @@ async function likeAndReplyTopComments() {
       const submitBtn = thread.querySelector('ytd-commentbox #submit-button');
 
       if (replyBox && submitBtn) {
-        replyBox.innerText = '&#9824;';
+        replyBox.innerText = commentText || 'Thanks for your comment!';
         replyBox.dispatchEvent(new Event('input', { bubbles: true }));
 
         await new Promise(res => setTimeout(res, 500));
@@ -117,3 +89,19 @@ async function likeAndReplyTopComments() {
 
   alert(`Liked and replied to ${processedCount} comments with ❤️`);
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+  const likeAndCommentButton = document.getElementById('likeAndCommentBtn');
+
+  likeAndCommentButton.addEventListener('click', function() {
+    const commentText = document.getElementById('yourComment').value;
+
+    chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+      chrome.scripting.executeScript({
+        target: { tabId: tabs[0].id },
+        function: likeAndReplyTopComments,
+        args: [commentText]
+      });
+    });
+  });
+});
