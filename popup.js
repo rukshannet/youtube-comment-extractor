@@ -117,7 +117,8 @@ async function likeAndReplyTopComments(commentText, useAI) {
 
 document.addEventListener('DOMContentLoaded', function() {
   const likeAndCommentButton = document.getElementById('likeAndCommentBtn');
-  
+  const extractAndAnalyzeButton = document.getElementById('extractAndAnalyzeBtn');
+
   likeAndCommentButton.addEventListener('click', function() {
     let commentText = document.getElementById('yourComment').value;
     const aiCheckbox = document.getElementById('aiReplyCheckbox');
@@ -129,6 +130,15 @@ document.addEventListener('DOMContentLoaded', function() {
         target: { tabId: tabs[0].id },
         function: likeAndReplyTopComments,
         args: [commentText, aiCheckbox.checked]
+      });
+    });
+  });
+
+  extractAndAnalyzeButton.addEventListener('click', function() {
+    chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+      chrome.scripting.executeScript({
+        target: { tabId: tabs[0].id },
+        function: extractComments
       });
     });
   });
