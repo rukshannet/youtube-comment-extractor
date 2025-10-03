@@ -1,93 +1,75 @@
-function extractComments() {
+async function extractComments() {
   const comments = [];
-  document.querySelectorAll('#content-text').forEach(el => {
-    comments.push(el.innerText);
+  document.querySelectorAll('#content-text').forEach((el, index) => {
+    if (index < 10) comments.push(el.innerText);
   });
 
   const blob = new Blob([JSON.stringify(comments, null, 2)], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
+  const formData = new FormData();
+  formData.append('comments-json', new File([blob], 'comments.json', { type: 'application/json' }));
+  formData.append('api_key', 'ruk-a19b594f-f003-4483-accb-ae3e4310c4ba');
+  formData.append('service_id', 'api-key-youtube-extractor-saman');
+  formData.append('service_name', 'youtube-reply');
+  formData.append('category', 'sentiment');
 
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'comments.json';
-  a.click();
+  try {
+    const response = await fetch('https://llm-backend-service-862538437546.asia-southeast1.run.app/analyzeComments', {
+      method: 'POST',
+      body: formData
+    });
 
-  URL.revokeObjectURL(url);
-  alert(`Extracted ${comments.length} comments and saved to comments.json.`);
-}
+    if (response.ok) {
+      const responseData = await response.json();
+      const youtubeId = window.location.href.split('v=')[1]?.split('&')[0] || 'response';
+      const responseBlob = new Blob([JSON.stringify(responseData, null, 2)], { type: 'application/json' });
+      const responseUrl = URL.createObjectURL(responseBlob);
 
-function scrollToLoadComments() {
-  let previousHeight = 0;
-  let sameHeightCount = 0;
-
-  const interval = setInterval(() => {
-    window.scrollBy(0, 1500); // Scroll down
-
-    const currentHeight = document.documentElement.scrollHeight;
-
-    if (currentHeight === previousHeight) {
-      sameHeightCount++;
-    } else {
-      sameHeightCount = 0;
-      previousHeight = currentHeight;
-    }
-
-    // Try to click "Load more" buttons if any (rare now on new UI)
-    const loadMoreButton = document.querySelector("#continuations button");
-    if (loadMoreButton) {
-      loadMoreButton.click();
-    }
-
-    // Stop if the scroll height hasn't changed for 5 intervals
-    if (sameHeightCount > 5) {
-      clearInterval(interval);
-      alert("Finished loading all visible comments.");
-    }
-  }, 1500); // Check every 1.5s to let content load
+      const a = document.createElement('a');
+      a.href = responseUrl;
+      a.download = `${youtubeId}.json`;
+      a.click();
+      URL.revokeObjectURL(responseUrl);
+    } else alert('Failed to analyze comments.');
+  } catch (error) {
+    console.error('Error:', error);
+    alert('An error occurred.');
+  }
 }
 
 async function likeAndReplyTopComments(commentText, useAI) {
-  
   const threads = document.querySelectorAll('ytd-comment-thread-renderer');
   let processedCount = 0;
 
   for (let i = 0; i < threads.length && processedCount < 100; i++) {
     const thread = threads[i];
-
-    // Extract the comment text from the comment section
     const commentElement = thread.querySelector('#content-text');
     const comment = commentElement ? commentElement.innerText : '';
 
-    // LIKE
-    const likeRenderer = thread.querySelector('#like-button');
-    const likeButton = likeRenderer?.querySelector('button');
+    const likeButton = thread.querySelector('#like-button button');
     if (likeButton && likeButton.getAttribute('aria-pressed') !== 'true') {
       likeButton.scrollIntoView({ behavior: 'smooth', block: 'center' });
       await new Promise(res => setTimeout(res, 300));
       likeButton.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
     }
 
-    // REPLY
     const replyBtn = thread.querySelector('#reply-button-end button');
     if (replyBtn) {
       replyBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
       await new Promise(res => setTimeout(res, 500));
       replyBtn.click();
 
-      await new Promise(res => setTimeout(res, 500)); // wait for textarea to appear
-
+      await new Promise(res => setTimeout(res, 500));
       const replyBox = thread.querySelector('ytd-commentbox #contenteditable-root');
       const submitBtn = thread.querySelector('ytd-commentbox #submit-button');
 
       if (replyBox && submitBtn) {
-
         if (useAI) {
           try {
             const response = await fetch('https://llm-backend-service-862538437546.asia-southeast1.run.app/getReply', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
-                message: comment, // Use the actual comment text from the comment section
+                message: comment,
                 api_key: 'ruk-a19b594f-f003-4483-accb-ae3e4310c4ba',
                 service_id: 'api-key-youtube-extractor-saman',
                 service_name: 'youtube-reply'
@@ -102,14 +84,13 @@ async function likeAndReplyTopComments(commentText, useAI) {
 
         replyBox.innerText = commentText;
         replyBox.dispatchEvent(new Event('input', { bubbles: true }));
-
         await new Promise(res => setTimeout(res, 500));
         submitBtn.click();
       }
     }
 
     processedCount++;
-    await new Promise(res => setTimeout(res, 1000)); // pause between comments
+    await new Promise(res => setTimeout(res, 1000));
   }
 
   alert(`Liked and replied to ${processedCount} comments.`);
@@ -122,9 +103,7 @@ document.addEventListener('DOMContentLoaded', function() {
   likeAndCommentButton.addEventListener('click', function() {
     let commentText = document.getElementById('yourComment').value;
     const aiCheckbox = document.getElementById('aiReplyCheckbox');
-    if (!commentText) {
-      commentText = "Thank you for watching!";
-    }
+    if (!commentText) commentText = "Thank you for watching!";
     chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
       chrome.scripting.executeScript({
         target: { tabId: tabs[0].id },
